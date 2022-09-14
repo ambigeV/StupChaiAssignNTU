@@ -60,7 +60,7 @@ def lda_details(data):
     data_2['output'] = 'transformed (blue)'
 
     newdata = pd.concat([data_1, data_2])
-    return newdata, transform
+    return newdata, transform[:, 0]
 
 
 def plot_data(new_data):
@@ -69,17 +69,30 @@ def plot_data(new_data):
     z = pd.factorize(new_data['output'])[0]
     print(z)
 
-    print(new_data)
+    mini_data = new_data[(new_data['output']!='(black)')&(new_data['output']!='(blue)')]
+    min_index = np.argmin(mini_data.values[:, 0])
+    max_index = np.argmax(mini_data.values[:, 0])
+
     # z = range(1, len(classes))
     for i in range(len(classes)):
         ind = new_data['output'] == classes[i]
+        if classes[i] in ['(black)', '(blue)']:
+            shape_char = 'o'
+        else:
+            shape_char = 'x'
         plt.scatter(new_data.iloc[:, 0][ind], new_data.iloc[:, 1][ind],
-                    label=classes[i])
+                    label=classes[i], marker=shape_char)
     # plt.xlabel('PCA_1')
     # plt.ylabel('PCA_2')
-    # plt.title('Scatter Plot for Principle Components in 2 Dimensions')
-    #
     plt.legend()
+    plt.plot(mini_data.values[[min_index, max_index], 0],
+             mini_data.values[[min_index, max_index], 1],
+             'y--')
+    if normal_if:
+        plt.title('Scatter Plot for 2 normalized dimensions and an FLDA projection line')
+    else:
+        plt.title('Scatter Plot for 2 un-normalized dimensions and an FLDA projection line')
+
     plt.show()
 
 
@@ -104,6 +117,7 @@ if __name__ == "__main__":
     data_1_3 = data.iloc[:, [0, 2, 3]]
     data_2_3 = data.iloc[:, [1, 2, 3]]
     target_data = data_2_3
+    print("The target data distribution is:\n", target_data)
 
     # print("The given data in (1,3) is follows:\n", data_1_2)
     # print("The given data in (2,3) is follows:\n", data_2_3)
